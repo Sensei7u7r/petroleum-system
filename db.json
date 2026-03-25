@@ -1,0 +1,87 @@
+{
+  "config": {
+    "apiVersion": "1.0",
+    "empresa": "Sistema Petrolero AR",
+    "zona": "America/Argentina/Buenos_Aires"
+  },
+  "overview": {
+    "produccion_bbl": 158400,
+    "brent_usd": 84.60,
+    "ingreso_diario_usd": 13400000,
+    "alertas_criticas": 1,
+    "alertas_menores": 2,
+    "eficiencia_pct": 91.4,
+    "costo_bbl": 30.4,
+    "pozos_activos": 38,
+    "pozos_total": 42
+  },
+  "campos": [
+    { "id": "norte-a", "nombre": "Campo Norte A", "tipo": "offshore", "pozos": 18, "produccion_bbl": 58400, "eficiencia_pct": 88, "estado": "activo", "activo": true },
+    { "id": "sur-b",   "nombre": "Campo Sur B",   "tipo": "onshore",  "pozos": 12, "produccion_bbl": 41200, "eficiencia_pct": 74, "estado": "activo", "activo": true },
+    { "id": "este-c",  "nombre": "Campo Este C",  "tipo": "mixto",    "pozos": 8,  "produccion_bbl": 28900, "eficiencia_pct": 61, "estado": "alerta", "activo": true },
+    { "id": "oeste-d", "nombre": "Campo Oeste D", "tipo": "onshore",  "pozos": 4,  "produccion_bbl": 14300, "eficiencia_pct": 28, "estado": "critico","activo": false }
+  ],
+  "pozos": [
+    { "id": "n-01", "nombre": "Pozo N-01", "presion_psi": 3420, "temp_c": 68, "estado": "normal",  "activo": true  },
+    { "id": "n-04", "nombre": "Pozo N-04", "presion_psi": 3210, "temp_c": 65, "estado": "normal",  "activo": true  },
+    { "id": "s-07", "nombre": "Pozo S-07", "presion_psi": 4890, "temp_c": 72, "estado": "alto",    "activo": true  },
+    { "id": "e-12", "nombre": "Pozo E-12", "presion_psi": 6100, "temp_c": 81, "estado": "critico", "activo": false }
+  ],
+  "tanques": [
+    { "id": "t-01", "nombre": "Tanque T-01", "capacidad_pct": 92, "estado": "critico" },
+    { "id": "t-02", "nombre": "Tanque T-02", "capacidad_pct": 74, "estado": "alerta"  },
+    { "id": "t-03", "nombre": "Tanque T-03", "capacidad_pct": 51, "estado": "normal"  },
+    { "id": "t-04", "nombre": "Tanque T-04", "capacidad_pct": 33, "estado": "normal"  },
+    { "id": "t-05", "nombre": "Tanque T-05", "capacidad_pct": 18, "estado": "normal"  },
+    { "id": "t-06", "nombre": "Tanque T-06", "capacidad_pct": 8,  "estado": "bajo"    }
+  ],
+  "productos": [
+    { "id": "nq-2241", "nombre": "Crudo liviano API 42°", "provincia": "Neuquén",        "tipo": "Crudo liviano", "lote": "NQ-2241", "destino": "Refinería La Plata",       "volumen": "3,200 m³", "valor_usd": 4820000, "progreso_pct": 88, "estado": "despachado", "activo": true  },
+    { "id": "ch-0891", "nombre": "Crudo pesado API 24°",  "provincia": "Chubut",         "tipo": "Crudo pesado", "lote": "CH-0891", "destino": "Exportación Puerto Madryn","volumen": "2,800 m³", "valor_usd": 3210000, "progreso_pct": 72, "estado": "transito",   "activo": true  },
+    { "id": "sc-5502", "nombre": "Gas natural seco",      "provincia": "Santa Cruz",     "tipo": "Gas natural",  "lote": "SC-5502", "destino": "Red TGS",                  "volumen": "18,400 mpc","valor_usd": 1840000, "progreso_pct": 94, "estado": "despachado", "activo": true  },
+    { "id": "mz-3310", "nombre": "Gasoil grado 2",        "provincia": "Mendoza",        "tipo": "Gasoil",       "lote": "MZ-3310", "destino": "YPF Luján de Cuyo",        "volumen": "1,600 m³", "valor_usd": 1120000, "progreso_pct": 61, "estado": "parcial",    "activo": true  },
+    { "id": "sa-1130", "nombre": "GLP fraccionado",       "provincia": "Salta",          "tipo": "GLP",          "lote": "SA-1130", "destino": "Planta Pocitos",            "volumen": "820 ton",  "valor_usd":  740000, "progreso_pct": 55, "estado": "parcial",    "activo": true  },
+    { "id": "nq-4421", "nombre": "Nafta virgen",          "provincia": "Neuquén",        "tipo": "Nafta",        "lote": "NQ-4421", "destino": "Petroquímica Comodoro",     "volumen": "980 m³",   "valor_usd":  890000, "progreso_pct": 40, "estado": "proceso",    "activo": true  },
+    { "id": "tf-0042", "nombre": "Crudo liviano API 38°", "provincia": "Tierra del Fuego","tipo": "Crudo liviano","lote": "TF-0042", "destino": "Almacenamiento Río Grande","volumen": "1,100 m³", "valor_usd":  720000, "progreso_pct": 22, "estado": "detenido",   "activo": false }
+  ],
+  "provincias": [
+    { "id": "neuquen",  "nombre": "Neuquén",        "cuenca": "Neuquina",  "pozos": 18, "produccion_bbl": 62400, "gas_mpc": 38200, "ingreso_usd": 5280000, "costo_usd": 1820000, "estado": "operativa" },
+    { "id": "chubut",   "nombre": "Chubut",         "cuenca": "San Jorge", "pozos": 12, "produccion_bbl": 38200, "gas_mpc": 18400, "ingreso_usd": 3230000, "costo_usd": 1240000, "estado": "revision"  },
+    { "id": "santa-cruz","nombre": "Santa Cruz",    "cuenca": "Austral",   "pozos": 9,  "produccion_bbl": 28800, "gas_mpc": 52100, "ingreso_usd": 2440000, "costo_usd":  880000, "estado": "operativa" },
+    { "id": "mendoza",  "nombre": "Mendoza",        "cuenca": "Cuyana",    "pozos": 6,  "produccion_bbl": 14200, "gas_mpc": 8400,  "ingreso_usd": 1200000, "costo_usd":  520000, "estado": "alerta"    },
+    { "id": "salta",    "nombre": "Salta",          "cuenca": "Noroeste",  "pozos": 4,  "produccion_bbl": 9800,  "gas_mpc": 6200,  "ingreso_usd":  830000, "costo_usd":  380000, "estado": "operativa" },
+    { "id": "tf",       "nombre": "Tierra del Fuego","cuenca": "Malvinas", "pozos": 3,  "produccion_bbl": 5000,  "gas_mpc": 12800, "ingreso_usd":  420000, "costo_usd":  280000, "estado": "critico"   }
+  ],
+  "costos": {
+    "extraccion_usd":   1880000,
+    "transporte_usd":   1260000,
+    "refinacion_usd":   1060000,
+    "regalias_usd":      680000,
+    "mantenimiento_usd": 440000
+  },
+  "sistemas": [
+    { "id": "scada",      "nombre": "SCADA central",       "estado": "online",    "activo": true  },
+    { "id": "oleoducto",  "nombre": "Oleoducto principal", "estado": "operativo", "activo": true  },
+    { "id": "bomba-b04",  "nombre": "Bomba inyección B-04","estado": "alerta",    "activo": true  },
+    { "id": "sep-e12",    "nombre": "Separador E-12",      "estado": "offline",   "activo": false },
+    { "id": "tgs",        "nombre": "Red TGS gasoducto",   "estado": "operativa", "activo": true  },
+    { "id": "satelital",  "nombre": "Enlace satelital",    "estado": "activo",    "activo": true  }
+  ],
+  "alertas": [
+    { "id": "a1", "nivel": "critico", "mensaje": "Separador E-12 offline — Tierra del Fuego", "timestamp": "hace 18 min", "reconocida": false },
+    { "id": "a2", "nivel": "alerta",  "mensaje": "Presión alta Pozo S-07 — 4,890 psi",        "timestamp": "hace 1h",     "reconocida": false },
+    { "id": "a3", "nivel": "info",    "mensaje": "Mantenimiento programado Campo D — mañana 06:00 ART", "timestamp": "", "reconocida": false }
+  ],
+  "mensajes": [
+    { "origen": "central", "texto": "Confirmar despacho NQ-2241 — ETA refinería?",     "ts": "14:02" },
+    { "origen": "campo",   "texto": "Campo NQ: Confirmado. ETA La Plata 14:30. Vol: 3,200 m³.", "ts": "14:04" },
+    { "origen": "central", "texto": "OK. Alerta E-12 recibida. Enviar técnico.",         "ts": "14:10" },
+    { "origen": "campo",   "texto": "Campo TF: Técnico en camino. ETA 2h. Producción -40%.", "ts": "14:12" }
+  ],
+  "historico": {
+    "labels": ["Oct","Nov","Dic","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic","Ene","Feb","Mar"],
+    "crudo":      [138000,142000,145000,141000,135000,148000,152000,149000,155000,158000,154000,160000,158000,162000,165000,161000,168000,172000],
+    "gas":        [38000,39000,41000,38000,36000,42000,44000,43000,46000,48000,45000,49000,48000,51000,52000,50000,54000,56000],
+    "condensado": [13000,14000,15000,13000,12000,15000,16000,15000,17000,18000,16000,18000,17000,19000,20000,18000,21000,22000]
+  }
+}
