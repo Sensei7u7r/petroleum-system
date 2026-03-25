@@ -1,0 +1,228 @@
+﻿═══════════════════════════════════════════════════════════════
+  SISTEMA OPERATIVO PETROLERO — ARGENTINA
+  Manual de operación v1.0
+═══════════════════════════════════════════════════════════════
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CÓMO SE CARGAN LOS VALORES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+El sistema tiene 3 capas:
+
+  1. BASE DE DATOS — data/db.json
+     Archivo JSON donde viven todos los datos del sistema.
+     Cada vez que un operador activa/desactiva un switch o
+     reconoce una alerta, el valor se escribe directamente
+     en este archivo y persiste aunque se reinicie el servidor.
+
+  2. API REST — server.js (puerto 3001)
+     El servidor Express lee db.json y lo sirve al frontend
+     a través de endpoints HTTP. Cada pantalla hace su propia
+     consulta al arrancar. Ejemplo:
+       - Panel "Campos" → GET /api/campos + /api/pozos + /api/tanques
+       - Panel "Hoja"   → GET /api/productos?provincia=Neuquén
+       - Panel "Central"→ GET /api/alertas + /api/mensajes + /api/sistemas
+
+  3. FRONTEND — public/index.html
+     Cuando abrís una sección, el frontend llama a la API con
+     tu token de seguridad, recibe los datos en JSON y los
+     renderiza en pantalla. Si la API no responde, carga datos
+     de demostración automáticamente (punto rojo en topbar).
+
+FLUJO COMPLETO:
+  Operador abre "Campos"
+    → Frontend pide GET /api/campos (con token)
+    → API lee data/db.json
+    → Devuelve JSON con campos, producción, estado
+    → Frontend renderiza las cards con barras y switches
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CÓMO OPERAR EL SISTEMA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+VISTA GENERAL (pantalla de inicio)
+  - Muestra las 4 métricas clave: producción, precio Brent,
+    ingresos del día y alertas activas.
+  - Gráfico histórico con 3 productos (Crudo / Gas / Condensado).
+    Podés cambiar el rango con los botones 6M / 1A / 2A.
+  - 6 botones de acceso directo a subsistemas (vista de dron).
+  - El punto en el topbar indica si la API está online (verde)
+    o en modo demostración (rojo).
+  - Botón de luna/sol (arriba derecha) cambia entre modo
+    claro y oscuro. La preferencia se guarda en el navegador.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBSISTEMA 1 — CAMPOS Y POZOS
+  QUÉ MUESTRA:
+    - 4 campos con producción en bbl, eficiencia en % y estado.
+    - 4 pozos con presión en psi y temperatura.
+    - 6 tanques con capacidad en %.
+
+  CÓMO OPERARLO:
+    - Switch derecho de cada campo/pozo → activa o desactiva.
+      Al mover el switch hace PATCH a la API y guarda en db.json.
+    - Badge de color indica estado:
+        Verde  = activo / normal
+        Naranja = alerta / presión alta
+        Rojo   = crítico / offline
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBSISTEMA 2 — HOJA DE PRODUCTOS
+  QUÉ MUESTRA:
+    - Todos los lotes de productos salientes con destino,
+      volumen, valor en USD y estado de despacho.
+
+  CÓMO OPERARLO:
+    - Filtro "Provincia" → filtra lotes por origen geográfico.
+    - Filtro "Tipo"      → filtra por Crudo / Gas / GLP / etc.
+    - Switch por lote    → activa o pausa el despacho.
+      El cambio se guarda en la base de datos.
+    - La barra de progreso muestra el % completado del despacho.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBSISTEMA 3 — PROVINCIAS
+  QUÉ MUESTRA:
+    - 6 tarjetas con producción, cuenca, ingreso y margen
+      por cada provincia productora.
+
+  CÓMO OPERARLO:
+    - Click en cualquier tarjeta → despliega detalle completo
+      con crudo, gas, pozos, ingreso, costo y margen del día.
+    - Colores por estado: verde = operativa, naranja = alerta,
+      rojo = crítico.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBSISTEMA 4 — MÁRGENES Y COSTOS
+  QUÉ MUESTRA:
+    - Desglose de costos operativos (extracción, transporte,
+      refinación, regalías, mantenimiento).
+    - Margen neto por provincia en USD/bbl.
+    - Simulador de margen interactivo.
+
+  CÓMO OPERARLO:
+    - Sliders del simulador:
+        Precio Brent  → arrastrás entre $50 y $120/bbl
+        Producción    → arrastrás entre 50k y 300k bbl/día
+        Costo op.     → arrastrás entre $15 y $60/bbl
+      Los 3 valores se recalculan en tiempo real mostrando
+      ingreso bruto, costo total y margen neto del día.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBSISTEMA 5 — REGRESIÓN Y PROYECCIÓN
+  QUÉ MUESTRA:
+    - Gráfico de regresión lineal sobre producción histórica.
+    - Línea de proyección a 30 días.
+    - Scatter de correlación precio Brent vs producción.
+    - Indicadores estadísticos (R², p-valor, Durbin-Watson).
+
+  INTERPRETACIÓN:
+    - R² = 0.912 → el modelo explica el 91% de la variación.
+    - P-valor = 0.0018 → relación estadísticamente significativa.
+    - Proyección 30d = 162k bbl → con IC 95% de ±3.8k bbl.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SUBSISTEMA 6 — CENTRAL / COMUNICACIONES
+  QUÉ MUESTRA:
+    - Alertas activas del sistema ordenadas por criticidad.
+    - Chat en vivo con Buenos Aires HQ.
+    - Estado de sistemas SCADA con switches.
+
+  CÓMO OPERARLO:
+    - Botón "Reconocer" en una alerta → la marca como atendida
+      y la atenúa. El cambio persiste en db.json.
+    - Campo de texto + botón "Enviar" → manda mensaje a central.
+      El mensaje se guarda en db.json y aparece en el historial.
+    - Switches SCADA → activan/desactivan sistemas en tiempo real.
+    - Punto pulsante = sistema en vivo. Punto fijo = offline.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ACTUALIZAR DATOS REALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Para cargar datos reales en el sistema:
+
+  1. Abrí el archivo:
+       petroleum-system/data/db.json
+
+  2. Editá los valores que necesitás. Ejemplo cambiar
+     el precio Brent actual:
+       "brent_usd": 84.60   →   "brent_usd": 91.40
+
+  3. Guardá el archivo. El servidor lo lee en cada request,
+     no hace falta reiniciarlo.
+
+  CAMPOS CLAVE a actualizar diariamente:
+    overview.produccion_bbl     → producción total del día
+    overview.brent_usd          → precio Brent actual
+    overview.ingreso_diario_usd → ingreso estimado
+    overview.alertas_criticas   → número de alertas
+    campos[].produccion_bbl     → producción por campo
+    campos[].eficiencia_pct     → eficiencia por campo
+    pozos[].presion_psi         → presión de cada pozo
+    tanques[].capacidad_pct     → nivel de cada tanque
+    historico.crudo[]           → agregar el dato del día nuevo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INDICADORES DE ESTADO — REFERENCIA RÁPIDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  VERDE  (ok)      → operativo, despachado, normal, online
+  NARANJA (alerta) → presión alta, parcial, en revisión
+  ROJO   (crítico) → offline, detenido, crítico
+  AZUL   (info)    → en tránsito, en proceso
+
+  API STATUS (topbar derecho):
+    Punto VERDE pulsante = conectado a la API real
+    Punto ROJO fijo      = modo demostración (API offline)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  COMANDOS ÚTILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Iniciar sistema:
+    cd petroleum-system
+    npm start
+
+  Verificar API desde navegador:
+    http://localhost:3001/api/health
+
+  Verificar datos desde navegador (con token):
+    Usar Postman o curl:
+    curl -H "Authorization: Bearer petroleum-ar-2025"
+         http://localhost:3001/api/overview
+
+  Cambiar token de seguridad:
+    En server.js línea: const TOKEN = '...'
+    O por variable de entorno: API_TOKEN=mi-token npm start
+
+  Cambiar puerto:
+    En server.js línea: const PORT = 3001
+    O: PORT=8080 npm start → abrís http://localhost:8080
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PRÓXIMAS MEJORAS SUGERIDAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [ ] Login con usuario y contraseña (JWT)
+  [ ] WebSockets para actualización automática cada 30s
+  [ ] Migrar db.json a PostgreSQL para múltiples usuarios
+  [ ] Exportar hoja de productos a Excel/PDF
+  [ ] Notificaciones push cuando alerta sea crítica
+  [ ] Deploy en servidor VPS o Railway para acceso remoto
+
+
+═══════════════════════════════════════════════════════════════
+  Sistema Petrolero AR — BayronDev
+═══════════════════════════════════════════════════════════════

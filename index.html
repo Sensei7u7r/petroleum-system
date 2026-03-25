@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema Operativo Petrolero — Argentina</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;font-size:14px;background:#f4f4f0;color:#1a1a1a}
+/* ── TOPBAR ── */
+.topbar{background:#fff;border-bottom:0.5px solid #ddd;padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-logo{font-size:15px;font-weight:500}
+.tb-breadcrumb{font-size:12px;color:#888;display:flex;align-items:center;gap:6px}
+.tb-right{display:flex;align-items:center;gap:10px;font-size:12px;color:#888}
+/* ── SHELL ── */
+.shell{max-width:1140px;margin:0 auto;padding:1.25rem 1.5rem}
+/* ── PANEL SELECTOR (drone view) ── */
+.drone-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.5rem}
+@media(max-width:680px){.drone-grid{grid-template-columns:repeat(2,1fr)}}
+.drone-btn{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1.1rem 1rem;cursor:pointer;transition:all .18s;text-align:left;position:relative;overflow:hidden}
+.drone-btn:hover{border-color:#378ADD;background:#f0f6fd}
+.drone-btn.active{border:2px solid #378ADD;background:#f0f6fd}
+.drone-btn .db-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:16px}
+.drone-btn .db-title{font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:2px}
+.drone-btn .db-sub{font-size:11px;color:#888}
+.drone-btn .db-badge{position:absolute;top:10px;right:10px;font-size:10px;padding:1px 6px;border-radius:6px}
+/* ── PAGES ── */
+.page{display:none}.page.active{display:block}
+/* ── GRIDS ── */
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:1rem}
+@media(max-width:700px){.g4,.g3{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+/* ── METRIC ── */
+.met{background:#eeede8;border-radius:8px;padding:.85rem 1rem}
+.met .l{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.met .v{font-size:20px;font-weight:500}
+.met .d{font-size:11px;margin-top:2px}
+/* ── CARD ── */
+.card{background:#fff;border:0.5px solid #ddd;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.ct{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+/* ── ROW ITEMS ── */
+.ri{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid #eee}
+.ri:last-child{border-bottom:none}
+.rl{display:flex;align-items:center;gap:9px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rn{font-size:13px}.rs{font-size:11px;color:#888}
+.rr{display:flex;align-items:center;gap:8px}
+.rv{font-size:13px;font-weight:500;min-width:72px;text-align:right}
+.bw{height:5px;background:#eee;border-radius:3px;width:80px}
+.bf{height:100%;border-radius:3px;transition:width .4s}
+/* ── BADGES ── */
+.bdg{font-size:11px;padding:2px 8px;border-radius:8px;min-width:54px;text-align:center;font-weight:500}
+.ok{background:#EAF3DE;color:#27500A}.wa{background:#FAEEDA;color:#633806}
+.er{background:#FCEBEB;color:#791F1F}.bl{background:#E6F1FB;color:#0C447C}
+.pu{background:#EEEDFE;color:#3C3489}
+/* ── SWITCH ── */
+.sw{position:relative;width:34px;height:18px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw-t{position:absolute;inset:0;border-radius:9px;background:#ccc;cursor:pointer;transition:background .18s}
+.sw input:checked+.sw-t{background:#378ADD}
+.sw-k{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .18s;pointer-events:none}
+.sw input:checked~.sw-k{transform:translateX(16px)}
+/* ── SEGMENTED ── */
+.seg{display:flex;border:0.5px solid #ddd;border-radius:8px;overflow:hidden}
+.seg button{flex:1;padding:5px 10px;font-size:11px;border:none;background:transparent;color:#888;cursor:pointer;transition:all .15s;white-space:nowrap}
+.seg button.active{background:#378ADD;color:#fff}
+/* ── TABS ── */
+.tab-row{display:flex;gap:4px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;border:0.5px solid #ddd;background:transparent;color:#888;transition:all .15s}
+.tab.active{background:#E6F1FB;color:#0C447C;border-color:#B5D4F4}
+.tab:hover:not(.active){background:#f4f4f0}
+/* ── BARS ── */
+.prog-r{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.prog-l{font-size:12px;color:#888;min-width:90px}
+.prog-b{flex:1;height:7px;background:#eee;border-radius:4px;overflow:hidden}
+.prog-f{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.prog-v{font-size:12px;font-weight:500;min-width:44px;text-align:right}
+/* ── MISC ── */
+select{padding:5px 10px;font-size:12px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer}
+input[type=text]{padding:6px 10px;font-size:12px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;width:100%}
+input[type=range]{width:100%;accent-color:#378ADD;margin:4px 0}
+button.btn{padding:6px 14px;font-size:12px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;cursor:pointer;transition:all .15s}
+button.btn:hover{background:#f4f4f0}
+button.btn.primary{background:#378ADD;color:#fff;border-color:#378ADD}
+.tag{font-size:11px;padding:2px 8px;border-radius:8px;background:#eee;color:#888}
+.alert-strip{padding:8px 12px;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.alert-strip.crit{background:#FCEBEB;color:#791F1F;border-left:3px solid #E24B4A}
+.alert-strip.warn{background:#FAEEDA;color:#633806;border-left:3px solid #EF9F27}
+.alert-strip.info{background:#EAF3DE;color:#27500A;border-left:3px solid #1D9E75}
+.msg-bubble{padding:9px 13px;border-radius:12px;font-size:13px;margin-bottom:6px;max-width:88%}
+.msg-in{background:#f0f0ec}.msg-out{background:#E6F1FB;color:#0C447C;margin-left:auto}
+.msg-wrap{display:flex;flex-direction:column;gap:2px;max-height:200px;overflow-y:auto}
+.pulse{animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.section-lbl{font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin:1.25rem 0 .75rem}
+.footer{padding:.75rem 1rem;background:#eeede8;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#888;margin-top:1rem}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:#378ADD;cursor:pointer;border:none;background:transparent;padding:0;margin-bottom:1rem}
+.back-btn:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo">Sistema Petrolero AR</div>
+    <div class="tb-breadcrumb" id="breadcrumb">
+      <span>Vista general</span>
+    </div>
+  </div>
+  <div class="tb-right">
+    <span class="pulse" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75"></span>
+    <span>En vivo</span>
+    <span id="clock-top">--:--:--</span>
+  </div>
+</div>
+
+<div class="shell">
+
+<!-- ══════════════════════════════════════════
+     VISTA GENERAL — siempre visible arriba
+══════════════════════════════════════════ -->
+<div id="overview">
+  <div class="g4" style="margin-top:.5rem">
+    <div class="met"><div class="l">Producción total</div><div class="v" style="color:#378ADD">158,400</div><div class="d" style="color:#3B6D11">bbl/día ▲ 2.8%</div></div>
+    <div class="met"><div class="l">Brent USD/bbl</div><div class="v">$84.60</div><div class="d" style="color:#3B6D11">▲ $1.20 hoy</div></div>
+    <div class="met"><div class="l">Ingresos estimados</div><div class="v" style="color:#3B6D11">$13.4M</div><div class="d">USD/día</div></div>
+    <div class="met"><div class="l">Alertas activas</div><div class="v" style="color:#E24B4A">3</div><div class="d" style="color:#854F0B">1 crítica · 2 menores</div></div>
+  </div>
+
+  <!-- Gráfico principal -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="ct" style="margin:0">Producción histórica — Argentina (bbl/día)</div>
+      <div class="seg" id="seg-range">
+        <button class="active" onclick="setRange('6m',this)">6M</button>
+        <button onclick="setRange('1a',this)">1A</button>
+        <button onclick="setRange('2a',this)">2A</button>
+        <button onclick="setRange('5a',this)">5A</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:10px;font-size:11px;color:#888;flex-wrap:wrap">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#378ADD;margin-right:4px"></span>Crudo</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1D9E75;margin-right:4px"></span>Gas asociado</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#EF9F27;margin-right:4px"></span>Condensado</span>
+    </div>
+    <div style="position:relative;width:100%;height:220px"><canvas id="chartMain"></canvas></div>
+  </div>
+
+  <!-- DRONE PANEL SELECTOR -->
+  <div class="section-lbl">Acceso directo a subsistemas</div>
+  <div class="drone-grid">
+    <button class="drone-btn" onclick="goPanel('campos')">
+      <div class="db-icon" style="background:#E6F1FB">⛽</div>
+      <div class="db-title">Campos y pozos</div>
+      <div class="db-sub">38 pozos · 4 campos · almacenamiento</div>
+      <span class="db-badge bdg wa">1 alerta</span>
+    </button>
+    <button class="drone-btn" onclick="goPanel('hoja')">
+      <div class="db-icon" style="background:#EAF3DE">📦</div>
+      <div class="db-title">Hoja de productos</div>
+      <div class="db-sub">Despachos salientes · filtros · lotes</div>
+      <span class="db-badge bdg ok">24 activos</span>
+    </button>
+    <button class="drone-btn" onclick="goPanel('provincias')">
+      <div class="db-icon" style="background:#EEEDFE">🗺</div>
+      <div class="db-title">Provincias</div>
+      <div class="db-sub">6 cuencas · detalle por región</div>
+      <span class="db-badge bdg er">TF crítico</span>
+    </button>
+    <button class="drone-btn" onclick="goPanel('margenes')">
+      <div class="db-icon" style="background:#FAEEDA">💰</div>
+      <div class="db-title">Márgenes y costos</div>
+      <div class="db-sub">Simulador · desglose · USD/bbl</div>
+      <span class="db-badge bdg ok">64% margen</span>
+    </button>
+    <button class="drone-btn" onclick="goPanel('regresion')">
+      <div class="db-icon" style="background:#FCEBEB">📈</div>
+      <div class="db-title">Regresión y proyección</div>
+      <div class="db-sub">R²=0.912 · proyección 30d · scatter</div>
+      <span class="db-badge bdg bl">+4.2% tend.</span>
+    </button>
+    <button class="drone-btn" onclick="goPanel('central')">
+      <div class="db-icon" style="background:#F1EFE8">📡</div>
+      <div class="db-title">Central / Comunicaciones</div>
+      <div class="db-sub">SCADA · alertas · mensajería HQ</div>
+      <span class="db-badge bdg er">1 crítica</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SUBPANELES (se muestran al hacer click)
+══════════════════════════════════════════ -->
+
+<!-- CAMPOS Y POZOS -->
+<div id="panel-campos" class="page">
+  <button class="back-btn" onclick="closePanel()">← Volver a vista general</button>
+  <div class="g4">
+    <div class="met"><div class="l">Pozos activos</div><div class="v">38 / 42</div><div class="d" style="color:#854F0B">4 en mantenimiento</div></div>
+    <div class="met"><div class="l">Eficiencia global</div><div class="v">91.4%</div><div class="d" style="color:#3B6D11">▲ 0.8% mes</div></div>
+    <div class="met"><div class="l">Presión media</div><div class="v">3,510 psi</div><div class="d" style="color:#3B6D11">Normal</div></div>
+    <div class="met"><div class="l">Temp. promedio</div><div class="v">68°C</div><div class="d" style="color:#888">Estable</div></div>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin:0">
+      <div class="ct">Campos activos — producción</div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#378ADD"></div><div><div class="rn">Campo Norte A</div><div class="rs">Offshore · 18 pozos</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:88%;background:#378ADD"></div></div><div class="rv">58,400 bbl</div><span class="bdg ok">Activo</span><label class="sw"><input type="checkbox" checked onchange="flog('Norte A')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#1D9E75"></div><div><div class="rn">Campo Sur B</div><div class="rs">Onshore · 12 pozos</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:74%;background:#1D9E75"></div></div><div class="rv">41,200 bbl</div><span class="bdg ok">Activo</span><label class="sw"><input type="checkbox" checked onchange="flog('Sur B')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#EF9F27"></div><div><div class="rn">Campo Este C</div><div class="rs">Mixto · 8 pozos</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:61%;background:#EF9F27"></div></div><div class="rv">28,900 bbl</div><span class="bdg wa">Alerta</span><label class="sw"><input type="checkbox" checked onchange="flog('Este C')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#E24B4A"></div><div><div class="rn">Campo Oeste D</div><div class="rs">Onshore · 4 pozos</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:28%;background:#E24B4A"></div></div><div class="rv">14,300 bbl</div><span class="bdg er">Crítico</span><label class="sw"><input type="checkbox" onchange="flog('Oeste D')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">Monitoreo de presión — pozos</div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#1D9E75"></div><div class="rn">Pozo N-01</div></div><div class="rr"><div class="rv">3,420 psi</div><span class="bdg ok">Normal</span><label class="sw"><input type="checkbox" checked onchange="flog('N-01')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#1D9E75"></div><div class="rn">Pozo N-04</div></div><div class="rr"><div class="rv">3,210 psi</div><span class="bdg ok">Normal</span><label class="sw"><input type="checkbox" checked onchange="flog('N-04')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#EF9F27"></div><div class="rn">Pozo S-07</div></div><div class="rr"><div class="rv">4,890 psi</div><span class="bdg wa">Alto</span><label class="sw"><input type="checkbox" checked onchange="flog('S-07')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#E24B4A"></div><div class="rn">Pozo E-12</div></div><div class="rr"><div class="rv">6,100 psi</div><span class="bdg er">Crítico</span><label class="sw"><input type="checkbox" onchange="flog('E-12')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Almacenamiento — tanques</div>
+    <div class="g2" style="margin:0">
+      <div>
+        <div class="prog-r"><div class="prog-l">Tanque T-01</div><div class="prog-b"><div class="prog-f" style="width:92%;background:#E24B4A"></div></div><div class="prog-v" style="color:#791F1F">92%</div></div>
+        <div class="prog-r"><div class="prog-l">Tanque T-02</div><div class="prog-b"><div class="prog-f" style="width:74%;background:#EF9F27"></div></div><div class="prog-v">74%</div></div>
+        <div class="prog-r" style="margin:0"><div class="prog-l">Tanque T-03</div><div class="prog-b"><div class="prog-f" style="width:51%;background:#378ADD"></div></div><div class="prog-v">51%</div></div>
+      </div>
+      <div>
+        <div class="prog-r"><div class="prog-l">Tanque T-04</div><div class="prog-b"><div class="prog-f" style="width:33%;background:#1D9E75"></div></div><div class="prog-v">33%</div></div>
+        <div class="prog-r"><div class="prog-l">Tanque T-05</div><div class="prog-b"><div class="prog-f" style="width:18%;background:#1D9E75"></div></div><div class="prog-v">18%</div></div>
+        <div class="prog-r" style="margin:0"><div class="prog-l">Tanque T-06</div><div class="prog-b"><div class="prog-f" style="width:8%;background:#888"></div></div><div class="prog-v" style="color:#888">8%</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOJA DE PRODUCTOS -->
+<div id="panel-hoja" class="page">
+  <button class="back-btn" onclick="closePanel()">← Volver a vista general</button>
+  <div class="g4">
+    <div class="met"><div class="l">Lotes totales</div><div class="v">24</div><div class="d" style="color:#0C447C">6 en tránsito</div></div>
+    <div class="met"><div class="l">Valor saliente</div><div class="v" style="color:#3B6D11">$13.4M</div><div class="d">USD hoy</div></div>
+    <div class="met"><div class="l">Despachados</div><div class="v">16</div><div class="d" style="color:#3B6D11">67% completado</div></div>
+    <div class="met"><div class="l">Detenidos</div><div class="v" style="color:#E24B4A">2</div><div class="d" style="color:#854F0B">Requieren acción</div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="ct" style="margin:0">Productos salientes por lote</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="sel-prov" onchange="filterHoja()">
+          <option value="">Todas las provincias</option>
+          <option>Neuquén</option><option>Chubut</option><option>Santa Cruz</option>
+          <option>Mendoza</option><option>Salta</option><option>Tierra del Fuego</option>
+        </select>
+        <select id="sel-tipo" onchange="filterHoja()">
+          <option value="">Todos los productos</option>
+          <option>Crudo liviano</option><option>Crudo pesado</option>
+          <option>Gas natural</option><option>GLP</option><option>Nafta</option><option>Gasoil</option>
+        </select>
+      </div>
+    </div>
+    <div id="hoja-list">
+      <div class="ri" data-prov="Neuquén" data-tipo="Crudo liviano"><div class="rl"><div class="dot" style="background:#378ADD"></div><div><div class="rn">Crudo liviano API 42° — Neuquén</div><div class="rs">Lote #NQ-2241 · Refinería La Plata · 3,200 m³</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:88%;background:#378ADD"></div></div><div class="rv">$4.82M</div><span class="bdg ok">Despachado</span><label class="sw"><input type="checkbox" checked onchange="flog('NQ-2241')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri" data-prov="Chubut" data-tipo="Crudo pesado"><div class="rl"><div class="dot" style="background:#185FA5"></div><div><div class="rn">Crudo pesado API 24° — Chubut</div><div class="rs">Lote #CH-0891 · Exportación Puerto Madryn · 2,800 m³</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:72%;background:#185FA5"></div></div><div class="rv">$3.21M</div><span class="bdg bl">En tránsito</span><label class="sw"><input type="checkbox" checked onchange="flog('CH-0891')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri" data-prov="Santa Cruz" data-tipo="Gas natural"><div class="rl"><div class="dot" style="background:#1D9E75"></div><div><div class="rn">Gas natural seco — Santa Cruz</div><div class="rs">Lote #SC-5502 · Red TGS · 18,400 mpc</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:94%;background:#1D9E75"></div></div><div class="rv">$1.84M</div><span class="bdg ok">Despachado</span><label class="sw"><input type="checkbox" checked onchange="flog('SC-5502')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri" data-prov="Mendoza" data-tipo="Gasoil"><div class="rl"><div class="dot" style="background:#7F77DD"></div><div><div class="rn">Gasoil grado 2 — Mendoza</div><div class="rs">Lote #MZ-3310 · YPF Luján de Cuyo · 1,600 m³</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:61%;background:#7F77DD"></div></div><div class="rv">$1.12M</div><span class="bdg wa">Parcial</span><label class="sw"><input type="checkbox" checked onchange="flog('MZ-3310')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri" data-prov="Salta" data-tipo="GLP"><div class="rl"><div class="dot" style="background:#EF9F27"></div><div><div class="rn">GLP fraccionado — Salta</div><div class="rs">Lote #SA-1130 · Planta Pocitos · 820 ton</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:55%;background:#EF9F27"></div></div><div class="rv">$0.74M</div><span class="bdg wa">Parcial</span><label class="sw"><input type="checkbox" checked onchange="flog('SA-1130')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri" data-prov="Neuquén" data-tipo="Nafta"><div class="rl"><div class="dot" style="background:#534AB7"></div><div><div class="rn">Nafta virgen — Neuquén</div><div class="rs">Lote #NQ-4421 · Petroquímica Comodoro · 980 m³</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:40%;background:#534AB7"></div></div><div class="rv">$0.89M</div><span class="bdg bl">En proceso</span><label class="sw"><input type="checkbox" checked onchange="flog('NQ-4421')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri" data-prov="Tierra del Fuego" data-tipo="Crudo liviano"><div class="rl"><div class="dot" style="background:#E24B4A"></div><div><div class="rn">Crudo liviano API 38° — Tierra del Fuego</div><div class="rs">Lote #TF-0042 · Almacenamiento Río Grande · 1,100 m³</div></div></div><div class="rr"><div class="bw"><div class="bf" style="width:22%;background:#E24B4A"></div></div><div class="rv">$0.72M</div><span class="bdg er">Detenido</span><label class="sw"><input type="checkbox" onchange="flog('TF-0042')"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROVINCIAS -->
+<div id="panel-provincias" class="page">
+  <button class="back-btn" onclick="closePanel()">← Volver a vista general</button>
+  <div class="g3">
+    <div class="card" style="margin:0;cursor:pointer" onclick="selProv('Neuquén')"><div class="ct">Neuquén</div><div style="font-size:18px;font-weight:500;color:#378ADD;margin-bottom:4px">62,400 bbl/d</div><div style="font-size:11px;color:#888;margin-bottom:8px">Cuenca Neuquina — 18 pozos</div><div class="prog-r"><div class="prog-l" style="min-width:60px">Crudo</div><div class="prog-b"><div class="prog-f" style="width:82%;background:#378ADD"></div></div><div class="prog-v">82%</div></div><div class="prog-r" style="margin:0"><div class="prog-l" style="min-width:60px">Gas</div><div class="prog-b"><div class="prog-f" style="width:61%;background:#1D9E75"></div></div><div class="prog-v">61%</div></div><div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px"><span class="bdg ok">Operativa</span><span style="color:#888">$5.28M/día</span></div></div>
+    <div class="card" style="margin:0;cursor:pointer" onclick="selProv('Chubut')"><div class="ct">Chubut</div><div style="font-size:18px;font-weight:500;color:#185FA5;margin-bottom:4px">38,200 bbl/d</div><div style="font-size:11px;color:#888;margin-bottom:8px">Cuenca San Jorge — 12 pozos</div><div class="prog-r"><div class="prog-l" style="min-width:60px">Crudo</div><div class="prog-b"><div class="prog-f" style="width:74%;background:#378ADD"></div></div><div class="prog-v">74%</div></div><div class="prog-r" style="margin:0"><div class="prog-l" style="min-width:60px">Gas</div><div class="prog-b"><div class="prog-f" style="width:48%;background:#1D9E75"></div></div><div class="prog-v">48%</div></div><div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px"><span class="bdg bl">En revisión</span><span style="color:#888">$3.23M/día</span></div></div>
+    <div class="card" style="margin:0;cursor:pointer" onclick="selProv('Santa Cruz')"><div class="ct">Santa Cruz</div><div style="font-size:18px;font-weight:500;color:#1D9E75;margin-bottom:4px">28,800 bbl/d</div><div style="font-size:11px;color:#888;margin-bottom:8px">Cuenca Austral — 9 pozos</div><div class="prog-r"><div class="prog-l" style="min-width:60px">Crudo</div><div class="prog-b"><div class="prog-f" style="width:55%;background:#378ADD"></div></div><div class="prog-v">55%</div></div><div class="prog-r" style="margin:0"><div class="prog-l" style="min-width:60px">Gas</div><div class="prog-b"><div class="prog-f" style="width:88%;background:#1D9E75"></div></div><div class="prog-v">88%</div></div><div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px"><span class="bdg ok">Operativa</span><span style="color:#888">$2.44M/día</span></div></div>
+    <div class="card" style="margin:0;cursor:pointer" onclick="selProv('Mendoza')"><div class="ct">Mendoza</div><div style="font-size:18px;font-weight:500;color:#7F77DD;margin-bottom:4px">14,200 bbl/d</div><div style="font-size:11px;color:#888;margin-bottom:8px">Cuenca Cuyana — 6 pozos</div><div class="prog-r"><div class="prog-l" style="min-width:60px">Crudo</div><div class="prog-b"><div class="prog-f" style="width:66%;background:#378ADD"></div></div><div class="prog-v">66%</div></div><div class="prog-r" style="margin:0"><div class="prog-l" style="min-width:60px">Gas</div><div class="prog-b"><div class="prog-f" style="width:38%;background:#1D9E75"></div></div><div class="prog-v">38%</div></div><div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px"><span class="bdg wa">Alerta</span><span style="color:#888">$1.20M/día</span></div></div>
+    <div class="card" style="margin:0;cursor:pointer" onclick="selProv('Salta')"><div class="ct">Salta</div><div style="font-size:18px;font-weight:500;color:#EF9F27;margin-bottom:4px">9,800 bbl/d</div><div style="font-size:11px;color:#888;margin-bottom:8px">Cuenca Noroeste — 4 pozos</div><div class="prog-r"><div class="prog-l" style="min-width:60px">Crudo</div><div class="prog-b"><div class="prog-f" style="width:42%;background:#378ADD"></div></div><div class="prog-v">42%</div></div><div class="prog-r" style="margin:0"><div class="prog-l" style="min-width:60px">GLP</div><div class="prog-b"><div class="prog-f" style="width:71%;background:#EF9F27"></div></div><div class="prog-v">71%</div></div><div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px"><span class="bdg ok">Operativa</span><span style="color:#888">$0.83M/día</span></div></div>
+    <div class="card" style="margin:0;cursor:pointer" onclick="selProv('Tierra del Fuego')"><div class="ct">Tierra del Fuego</div><div style="font-size:18px;font-weight:500;color:#E24B4A;margin-bottom:4px">5,000 bbl/d</div><div style="font-size:11px;color:#888;margin-bottom:8px">Cuenca Malvinas — 3 pozos</div><div class="prog-r"><div class="prog-l" style="min-width:60px">Crudo</div><div class="prog-b"><div class="prog-f" style="width:28%;background:#E24B4A"></div></div><div class="prog-v">28%</div></div><div class="prog-r" style="margin:0"><div class="prog-l" style="min-width:60px">Gas</div><div class="prog-b"><div class="prog-f" style="width:52%;background:#1D9E75"></div></div><div class="prog-v">52%</div></div><div style="margin-top:8px;display:flex;justify-content:space-between;font-size:11px"><span class="bdg er">Crítico</span><span style="color:#888">$0.42M/día</span></div></div>
+  </div>
+  <div id="prov-detail" style="display:none" class="card"><div class="ct" id="prov-detail-title"></div><div id="prov-detail-body"></div></div>
+</div>
+
+<!-- MARGENES -->
+<div id="panel-margenes" class="page">
+  <button class="back-btn" onclick="closePanel()">← Volver a vista general</button>
+  <div class="g4">
+    <div class="met"><div class="l">Ingreso bruto</div><div class="v">$13.40M</div><div class="d" style="color:#3B6D11">USD/día</div></div>
+    <div class="met"><div class="l">Costo operativo</div><div class="v">$4.82M</div><div class="d" style="color:#854F0B">36% del ingreso</div></div>
+    <div class="met"><div class="l">Margen neto</div><div class="v" style="color:#3B6D11">$8.58M</div><div class="d" style="color:#3B6D11">64.0% margen</div></div>
+    <div class="met"><div class="l">Costo/bbl</div><div class="v">$30.4</div><div class="d" style="color:#3B6D11">▼ $1.2 sem. ant.</div></div>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin:0">
+      <div class="ct">Desglose costos operativos</div>
+      <div class="prog-r"><div class="prog-l">Extracción</div><div class="prog-b"><div class="prog-f" style="width:78%;background:#378ADD"></div></div><div class="prog-v">$1.88M</div></div>
+      <div class="prog-r"><div class="prog-l">Transporte</div><div class="prog-b"><div class="prog-f" style="width:52%;background:#7F77DD"></div></div><div class="prog-v">$1.26M</div></div>
+      <div class="prog-r"><div class="prog-l">Refinación</div><div class="prog-b"><div class="prog-f" style="width:44%;background:#1D9E75"></div></div><div class="prog-v">$1.06M</div></div>
+      <div class="prog-r"><div class="prog-l">Regalías</div><div class="prog-b"><div class="prog-f" style="width:28%;background:#EF9F27"></div></div><div class="prog-v">$0.68M</div></div>
+      <div class="prog-r" style="margin:0"><div class="prog-l">Mantenimiento</div><div class="prog-b"><div class="prog-f" style="width:18%;background:#E24B4A"></div></div><div class="prog-v">$0.44M</div></div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">Margen por provincia (USD/bbl)</div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#378ADD"></div><div class="rn">Neuquén</div></div><div class="rr"><div class="rv">$54.2</div><span class="bdg ok">+12.4%</span></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#185FA5"></div><div class="rn">Chubut</div></div><div class="rr"><div class="rv">$48.8</div><span class="bdg ok">+8.1%</span></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#1D9E75"></div><div class="rn">Santa Cruz</div></div><div class="rr"><div class="rv">$44.1</div><span class="bdg ok">+5.3%</span></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#7F77DD"></div><div class="rn">Mendoza</div></div><div class="rr"><div class="rv">$38.6</div><span class="bdg wa">-2.1%</span></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#EF9F27"></div><div class="rn">Salta</div></div><div class="rr"><div class="rv">$31.2</div><span class="bdg wa">-4.8%</span></div></div>
+      <div class="ri"><div class="rl"><div class="dot" style="background:#E24B4A"></div><div class="rn">Tierra del Fuego</div></div><div class="rr"><div class="rv">$22.4</div><span class="bdg er">-11.2%</span></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div class="ct" style="margin:0">Simulador de margen</div><span class="tag">Tiempo real</span></div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
+      <div style="flex:1;min-width:150px"><div style="font-size:12px;color:#888;margin-bottom:4px">Precio Brent (USD/bbl)</div><input type="range" min="50" max="120" value="84" step="1" id="sl-price" oninput="recalc()"><div style="font-size:13px;font-weight:500" id="sl-price-v">$84</div></div>
+      <div style="flex:1;min-width:150px"><div style="font-size:12px;color:#888;margin-bottom:4px">Producción (bbl/día ×1000)</div><input type="range" min="50" max="300" value="158" step="1" id="sl-prod" oninput="recalc()"><div style="font-size:13px;font-weight:500" id="sl-prod-v">158k</div></div>
+      <div style="flex:1;min-width:150px"><div style="font-size:12px;color:#888;margin-bottom:4px">Costo operativo (USD/bbl)</div><input type="range" min="15" max="60" value="30" step="1" id="sl-cost" oninput="recalc()"><div style="font-size:13px;font-weight:500" id="sl-cost-v">$30</div></div>
+    </div>
+    <div class="g3" style="margin:0">
+      <div class="met"><div class="l">Ingreso bruto/día</div><div class="v" id="r-ing">$13.37M</div></div>
+      <div class="met"><div class="l">Costo total/día</div><div class="v" id="r-cost">$4.74M</div></div>
+      <div class="met"><div class="l">Margen neto/día</div><div class="v" id="r-mar" style="color:#3B6D11">$8.63M</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- REGRESION -->
+<div id="panel-regresion" class="page">
+  <button class="back-btn" onclick="closePanel()">← Volver a vista general</button>
+  <div class="g4">
+    <div class="met"><div class="l">R² modelo</div><div class="v">0.912</div><div class="d" style="color:#3B6D11">Alta correlación</div></div>
+    <div class="met"><div class="l">Tendencia 30d</div><div class="v">+4.2%</div><div class="d" style="color:#3B6D11">Creciente</div></div>
+    <div class="met"><div class="l">Proyección mes</div><div class="v">162k bbl</div><div class="d" style="color:#0C447C">IC 95%: ±3.8k</div></div>
+    <div class="met"><div class="l">Precio proyectado</div><div class="v">$86.2</div><div class="d" style="color:#3B6D11">▲ Brent +1.9%</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">Regresión lineal — producción histórica y proyección</div>
+    <div style="display:flex;gap:14px;margin-bottom:10px;font-size:11px;color:#888">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#378ADD;margin-right:4px"></span>Real</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E24B4A;margin-right:4px"></span>Regresión</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1D9E75;margin-right:4px"></span>Proyección</span>
+    </div>
+    <div style="position:relative;width:100%;height:220px"><canvas id="chartReg"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin:0"><div class="ct">Scatter precio vs producción</div><div style="position:relative;width:100%;height:180px"><canvas id="chartScatter"></canvas></div></div>
+    <div class="card" style="margin:0">
+      <div class="ct">Indicadores estadísticos</div>
+      <div class="ri"><div class="rn">Coeficiente β</div><div class="rv">+1.84</div></div>
+      <div class="ri"><div class="rn">Intercepto α</div><div class="rv">42,210</div></div>
+      <div class="ri"><div class="rn">Error estándar</div><div class="rv">±4,820</div></div>
+      <div class="ri"><div class="rn">P-valor</div><div class="rv" style="color:#3B6D11">0.0018</div></div>
+      <div class="ri"><div class="rn">Durbin-Watson</div><div class="rv">1.92</div></div>
+      <div class="ri"><div class="rn">Outliers</div><div class="rv" style="color:#854F0B">2 (Feb, Jul)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CENTRAL -->
+<div id="panel-central" class="page">
+  <button class="back-btn" onclick="closePanel()">← Volver a vista general</button>
+  <div id="alert-crit" class="alert-strip crit"><span style="font-weight:500">CRÍTICO</span> Separador E-12 offline — Tierra del Fuego — hace 18 min<button class="btn" style="margin-left:auto;font-size:11px;padding:2px 8px" onclick="ack('alert-crit')">Reconocer</button></div>
+  <div id="alert-warn" class="alert-strip warn"><span style="font-weight:500">ALERTA</span> Presión alta Pozo S-07 — 4,890 psi<button class="btn" style="margin-left:auto;font-size:11px;padding:2px 8px" onclick="ack('alert-warn')">Reconocer</button></div>
+  <div class="alert-strip info"><span style="font-weight:500">INFO</span> Mantenimiento programado Campo D — mañana 06:00 ART</div>
+  <div class="g2" style="margin-top:1rem">
+    <div class="card" style="margin:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div class="ct" style="margin:0">Mensajería — Buenos Aires HQ</div><span class="tag">En vivo</span></div>
+      <div class="msg-wrap" id="chat-msgs">
+        <div class="msg-bubble msg-in"><b>Central BsAs:</b> Confirmar despacho NQ-2241 — ETA refinería?</div>
+        <div class="msg-bubble msg-out">Campo NQ: Confirmado. ETA La Plata 14:30. Vol: 3,200 m³.</div>
+        <div class="msg-bubble msg-in"><b>Central BsAs:</b> OK. Alerta E-12 recibida. Enviar técnico.</div>
+        <div class="msg-bubble msg-out">Campo TF: Técnico en camino. ETA 2h. Producción -40%.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="msg-input" placeholder="Mensaje a central...">
+        <button class="btn primary" onclick="sendMsg()">Enviar</button>
+      </div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">Estado sistemas — SCADA</div>
+      <div class="ri"><div class="rl"><span class="pulse" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-right:4px"></span><div class="rn">SCADA central</div></div><div class="rr"><span class="bdg ok">Online</span><label class="sw"><input type="checkbox" checked><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><span class="pulse" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-right:4px"></span><div class="rn">Oleoducto principal</div></div><div class="rr"><span class="bdg ok">Operativo</span><label class="sw"><input type="checkbox" checked><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><span class="pulse" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EF9F27;margin-right:4px"></span><div class="rn">Bomba inyección B-04</div></div><div class="rr"><span class="bdg wa">Alerta</span><label class="sw"><input type="checkbox" checked><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#E24B4A;margin-right:4px"></span><div class="rn">Separador E-12</div></div><div class="rr"><span class="bdg er">Offline</span><label class="sw"><input type="checkbox"><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><span class="pulse" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-right:4px"></span><div class="rn">Red TGS gasoducto</div></div><div class="rr"><span class="bdg ok">Operativa</span><label class="sw"><input type="checkbox" checked><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+      <div class="ri"><div class="rl"><span class="pulse" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;margin-right:4px"></span><div class="rn">Enlace satelital</div></div><div class="rr"><span class="bdg ok">Activo</span><label class="sw"><input type="checkbox" checked><div class="sw-t"></div><div class="sw-k"></div></label></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span id="foot-clock">--:--:--</span>
+  <span id="foot-log">Sistema iniciado — todos los módulos operativos</span>
+</div>
+
+</div><!-- /shell -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const PANELS=['campos','hoja','provincias','margenes','regresion','central'];
+const BREADCRUMBS={campos:'Campos y pozos',hoja:'Hoja de productos',provincias:'Provincias',margenes:'Márgenes y costos',regresion:'Regresión',central:'Central / Comunicaciones'};
+let currentPanel=null,regBuilt=false;
+
+function goPanel(id){
+  closePanel();
+  currentPanel=id;
+  document.getElementById('overview').style.display='none';
+  document.querySelectorAll('.drone-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('breadcrumb').innerHTML='<span style="color:#aaa;cursor:pointer" onclick="closePanel()">Vista general</span> <span style="color:#aaa">›</span> <span>'+BREADCRUMBS[id]+'</span>';
+  if(id==='regresion')setTimeout(buildRegCharts,80);
+  window.scrollTo({top:0,behavior:'smooth'});
+  flog('Accediendo: '+BREADCRUMBS[id]);
+}
+
+function closePanel(){
+  if(currentPanel){
+    document.getElementById('panel-'+currentPanel).classList.remove('active');
+    currentPanel=null;
+  }
+  document.getElementById('overview').style.display='block';
+  document.getElementById('breadcrumb').innerHTML='<span>Vista general</span>';
+}
+
+function filterHoja(){
+  const prov=document.getElementById('sel-prov').value;
+  const tipo=document.getElementById('sel-tipo').value;
+  document.querySelectorAll('#hoja-list .ri').forEach(r=>{
+    r.style.display=(!prov||r.dataset.prov===prov)&&(!tipo||r.dataset.tipo===tipo)?'flex':'none';
+  });
+  flog('Filtro: '+(prov||'todas')+' / '+(tipo||'todos'));
+}
+
+function selProv(p){
+  const data={
+    'Neuquén':{cuenca:'Neuquina',pozos:18,prod:'62,400',gas:'38,200 mpc',ing:'5.28',cos:'1.82',mar:'3.46'},
+    'Chubut':{cuenca:'San Jorge',pozos:12,prod:'38,200',gas:'18,400 mpc',ing:'3.23',cos:'1.24',mar:'1.99'},
+    'Santa Cruz':{cuenca:'Austral',pozos:9,prod:'28,800',gas:'52,100 mpc',ing:'2.44',cos:'0.88',mar:'1.56'},
+    'Mendoza':{cuenca:'Cuyana',pozos:6,prod:'14,200',gas:'8,400 mpc',ing:'1.20',cos:'0.52',mar:'0.68'},
+    'Salta':{cuenca:'Noroeste',pozos:4,prod:'9,800',gas:'6,200 mpc',ing:'0.83',cos:'0.38',mar:'0.45'},
+    'Tierra del Fuego':{cuenca:'Malvinas',pozos:3,prod:'5,000',gas:'12,800 mpc',ing:'0.42',cos:'0.28',mar:'0.14'},
+  };
+  const d=data[p];
+  document.getElementById('prov-detail-title').textContent='Detalle — '+p+' / Cuenca '+d.cuenca;
+  document.getElementById('prov-detail-body').innerHTML=`<div class="g3" style="margin-bottom:10px"><div class="met"><div class="l">Crudo bbl/d</div><div class="v">${d.prod}</div></div><div class="met"><div class="l">Gas mpc/d</div><div class="v">${d.gas}</div></div><div class="met"><div class="l">Pozos activos</div><div class="v">${d.pozos}</div></div></div><div class="g3" style="margin:0"><div class="met"><div class="l">Ingreso</div><div class="v" style="color:#3B6D11">$${d.ing}M</div></div><div class="met"><div class="l">Costo</div><div class="v" style="color:#854F0B">$${d.cos}M</div></div><div class="met"><div class="l">Margen</div><div class="v" style="color:#0C447C">$${d.mar}M</div></div></div>`;
+  document.getElementById('prov-detail').style.display='block';
+}
+
+function recalc(){
+  const pr=+document.getElementById('sl-price').value;
+  const pd=+document.getElementById('sl-prod').value;
+  const co=+document.getElementById('sl-cost').value;
+  document.getElementById('sl-price-v').textContent='$'+pr;
+  document.getElementById('sl-prod-v').textContent=pd+'k';
+  document.getElementById('sl-cost-v').textContent='$'+co;
+  const ing=(pr*pd*1000/1e6).toFixed(2);
+  const cost=(co*pd*1000/1e6).toFixed(2);
+  const mar=(ing-cost).toFixed(2);
+  document.getElementById('r-ing').textContent='$'+ing+'M';
+  document.getElementById('r-cost').textContent='$'+cost+'M';
+  const el=document.getElementById('r-mar');
+  el.textContent='$'+mar+'M';
+  el.style.color=mar>0?'#3B6D11':'#E24B4A';
+}
+
+const MONTHS=['Oct','Nov','Dic','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar'];
+
+function setRange(r,btn){
+  document.querySelectorAll('#seg-range button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const n={
+    '6m':{labels:MONTHS.slice(12),n:6},
+    '1a':{labels:MONTHS,n:18},
+    '2a':{labels:MONTHS.map((m,i)=>i%2===0?m:''),n:18},
+    '5a':{labels:MONTHS.map((m,i)=>i%4===0?m:''),n:18}
+  };
+  const d=n[r];
+  mainChart.data.labels=d.labels;
+  mainChart.data.datasets.forEach(ds=>{
+    ds.data=genData(d.labels.length,ds._base,ds._var);
+  });
+  mainChart.update('active');
+  flog('Rango: '+r.toUpperCase());
+}
+
+function genData(n,base,variance){
+  return Array.from({length:n},(_,i)=>Math.round(base+Math.sin(i*.5)*variance+(Math.random()-.5)*variance*.3));
+}
+
+let mainChart;
+window.addEventListener('load',()=>{
+  const ctx=document.getElementById('chartMain').getContext('2d');
+  const ds1={label:'Crudo',data:genData(6,95000,18000),borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.07)',tension:.4,fill:true,pointRadius:3,borderWidth:2,_base:95000,_var:18000};
+  const ds2={label:'Gas',data:genData(6,38000,8000),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.05)',tension:.4,fill:true,pointRadius:3,borderWidth:2,_base:38000,_var:8000};
+  const ds3={label:'Condensado',data:genData(6,14000,4000),borderColor:'#EF9F27',backgroundColor:'rgba(239,159,39,0.05)',tension:.4,fill:true,pointRadius:3,borderWidth:2,_base:14000,_var:4000};
+  mainChart=new Chart(ctx,{type:'line',data:{labels:MONTHS.slice(12),datasets:[ds1,ds2,ds3]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y.toLocaleString()+' bbl'}}},scales:{x:{grid:{color:'rgba(128,128,128,.07)'},ticks:{color:'#888',font:{size:11}}},y:{grid:{color:'rgba(128,128,128,.07)'},ticks:{color:'#888',font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}},animation:{duration:500,easing:'easeInOutQuart'}}});
+});
+
+function buildRegCharts(){
+  if(regBuilt)return; regBuilt=true;
+  const real=[138,142,145,141,135,148,152,149,155,158,154,160,158,162,165,161,168,172];
+  const reg=real.map((_,i)=>Math.round(136+i*2.1));
+  const proj=[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,168,173,178];
+  new Chart(document.getElementById('chartReg'),{type:'line',data:{labels:MONTHS,datasets:[{label:'Real',data:real,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.06)',tension:.4,fill:true,pointRadius:3,borderWidth:2},{label:'Regresión',data:reg,borderColor:'#E24B4A',borderDash:[6,3],tension:.3,fill:false,pointRadius:0,borderWidth:1.5},{label:'Proyección',data:proj,borderColor:'#1D9E75',borderDash:[4,4],tension:.3,fill:false,pointRadius:4,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,.07)'},ticks:{color:'#888',font:{size:11}}},y:{grid:{color:'rgba(128,128,128,.07)'},ticks:{color:'#888',font:{size:11},callback:v=>v+'k'}}}}});
+  const prices=[62,68,72,74,70,78,80,76,82,86,84,88,84,90,88,84,88,92];
+  new Chart(document.getElementById('chartScatter'),{type:'scatter',data:{datasets:[{label:'Px Prod',data:prices.map((p,i)=>({x:p,y:real[i]})),backgroundColor:'rgba(55,138,221,0.5)',pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Brent USD/bbl',color:'#888',font:{size:11}},grid:{color:'rgba(128,128,128,.07)'},ticks:{color:'#888',font:{size:11}}},y:{title:{display:true,text:'Prod (k bbl)',color:'#888',font:{size:11}},grid:{color:'rgba(128,128,128,.07)'},ticks:{color:'#888',font:{size:11},callback:v=>v+'k'}}}}});
+}
+
+function sendMsg(){
+  const input=document.getElementById('msg-input');
+  const txt=input.value.trim(); if(!txt)return;
+  const wrap=document.getElementById('chat-msgs');
+  const d=document.createElement('div'); d.className='msg-bubble msg-out'; d.textContent=txt;
+  wrap.appendChild(d); input.value=''; wrap.scrollTop=wrap.scrollHeight; flog('Mensaje enviado a central');
+  setTimeout(()=>{const r=document.createElement('div');r.className='msg-bubble msg-in';r.innerHTML='<b>Central BsAs:</b> Recibido. Procesando.';wrap.appendChild(r);wrap.scrollTop=wrap.scrollHeight;},1200);
+}
+
+function ack(id){
+  const el=document.getElementById(id);
+  if(el)el.style.opacity='0.35';
+  flog('Alerta reconocida: '+id);
+}
+
+function flog(msg){document.getElementById('foot-log').textContent=msg;}
+
+function tick(){
+  const n=new Date(),s=n.toLocaleTimeString('es-AR');
+  document.getElementById('foot-clock').textContent=s;
+  document.getElementById('clock-top').textContent=s;
+}
+setInterval(tick,1000);tick();
+</script>
+</body>
+</html>
